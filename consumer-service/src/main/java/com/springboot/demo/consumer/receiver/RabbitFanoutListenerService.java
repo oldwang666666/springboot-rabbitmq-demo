@@ -1,5 +1,6 @@
 package com.springboot.demo.consumer.receiver;
 
+import com.rabbitmq.client.Channel;
 import org.springframework.amqp.core.ExchangeTypes;
 import org.springframework.amqp.rabbit.annotation.Exchange;
 import org.springframework.amqp.rabbit.annotation.Queue;
@@ -43,9 +44,14 @@ import java.util.Map;
 })
 public class RabbitFanoutListenerService {
 
+    //这里只是demo所以直接抛出异常，实际业务要根据自己的业务进行异常捕获，使用basicAck、basicNack、basicReject等方法对消息进行处理，还有幂等处理
     @RabbitHandler
-    public void getMessage(@Payload String msg, @Headers Map<String, Object> headers) {
+    public void getMessage(@Payload String msg, Channel channel, @Headers Map<String, Object> headers) throws Exception {
+
+        long deliveryTag = (Long)headers.get(AmqpHeaders.DELIVERY_TAG);
         //headers.get(AmqpHeaders.CONSUMER_QUEUE) 打印的是QueueBinding中Queue的值
-        System.out.println("接收" + headers.get(AmqpHeaders.CONSUMER_QUEUE) + "消费者的消息:" + msg);
+        System.out.println("幂等处理 & 业务处理  接收" + headers.get(AmqpHeaders.CONSUMER_QUEUE) + "消费者的消息:" + msg);
+        //消息确认，deliveryTag:该消息的index，multiple：是否批量.true:将一次性ack所有小于deliveryTag的消息。
+        channel.basicAck(deliveryTag, false);
     }
 }
