@@ -82,7 +82,7 @@ public class RabbitDirectListenerService {
     public void getMessage(@Payload byte[] message, Channel channel, @Headers Map<String, Object> headers) throws Exception {
 
         long deliveryTag = (Long)headers.get(AmqpHeaders.DELIVERY_TAG);
-        //做拒绝查看demo，没有私信队列，所以拒绝后会一直重发，方便查看rabbimq消息
+        //做拒绝查看demo，没有死信队列，所以拒绝后会一直重发，方便查看rabbimq消息
         if(deliveryTag > 4) {
             System.out.println("deliveryTag:" + deliveryTag + "，---------消息拒绝 : " + (new String(message)));
             //消息拒绝deliveryTag:该消息的index，requeue：被拒绝的是否重新入队列(false:不进入，true:进入)
